@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="6dp"
-    android:background="#f69717"
+    android:background="@color/white"
     >
 
-    <com.kale.wfalldemo.extra.fresco.DynamicHeightSimpleDraweeView
+    <com.kale.wfalldemo.extra.view.DynamicHeightSimpleDraweeView
         android:id="@+id/aaa_wf_item_content_DraweeView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

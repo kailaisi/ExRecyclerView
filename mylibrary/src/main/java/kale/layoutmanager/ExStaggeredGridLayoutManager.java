@@ -12,9 +12,7 @@ import android.view.View;
  */
 public class ExStaggeredGridLayoutManager extends StaggeredGridLayoutManager {
 
-    private final String TAG = getClass().getSimpleName();
-
-    GridLayoutManager.SpanSizeLookup mSpanSizeLookup;
+    private GridLayoutManager.SpanSizeLookup mSpanSizeLookup;
 
     public ExStaggeredGridLayoutManager(int spanCount, int orientation) {
         super(spanCount, orientation);

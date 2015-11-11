@@ -1,4 +1,4 @@
-package com.kale.wfalldemo.net;
+package com.kale.wfalldemo.extra.net;
 
 import com.google.gson.Gson;
 

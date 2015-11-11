@@ -1,0 +1,31 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#eeeeee"
+    >
+
+    <FrameLayout
+        android:id="@+id/waterFall_fl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <ImageView
+        android:id="@+id/float_imageButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="right|bottom"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/aaa_go_top_icon"
+        />
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="center_horizontal|top"
+        android:background="?attr/colorPrimary"
+        />
+
+</FrameLayout>

@@ -1,4 +1,4 @@
-package com.kale.wfalldemo.extra.fresco;
+package com.kale.wfalldemo.extra.view;
 
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.view.SimpleDraweeView;

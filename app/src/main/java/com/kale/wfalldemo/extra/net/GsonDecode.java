@@ -1,7 +1,7 @@
-package com.kale.wfalldemo.net;
+package com.kale.wfalldemo.extra.net;
 
 import com.android.volley.Response;
-import com.kale.wfalldemo.application.WaterFallApplication;
+import com.kale.wfalldemo.extra.MyApplication;
 
 
 /**
@@ -17,9 +17,7 @@ public class GsonDecode<T> {
     public void getGsonData(String url, Class<T> cls, Response.Listener<T> listener,
             Response.ErrorListener errorListener) {
         
-        GsonRequest<T> gsonRequest = new GsonRequest<T>(
-                url,
-                cls, listener, errorListener);
-        WaterFallApplication.requestQueue.add(gsonRequest);
+        GsonRequest<T> gsonRequest = new GsonRequest<>(url, cls, listener, errorListener);
+        MyApplication.requestQueue.add(gsonRequest);
     }
 }

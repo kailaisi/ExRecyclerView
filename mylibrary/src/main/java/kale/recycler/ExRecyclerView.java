@@ -5,22 +5,21 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.AdapterView;
 
 import kale.layoutmanager.ExStaggeredGridLayoutManager;
 
 /**
  * 增强型RecyclerView，可以设置头底视图
+ *
  * @author Jack Tony
  * @attention 必须在设置adapter前设置header或footer, clickListener
  * @date 2015/4/11
  */
 public class ExRecyclerView extends RecyclerView {
 
-    // protected final String TAG = getClass().getSimpleName();
-    private View mHeaderView = null;
+    private View mHeaderView;
 
-    private View mFooterView = null;
+    private View mFooterView;
 
     public ExRecyclerView(Context context) {
         super(context);
@@ -47,48 +46,24 @@ public class ExRecyclerView extends RecyclerView {
     }
 
     /**
-     * 设置Grid/StaggeredGrid LayoutManager的布局样式
+     * Set the header view of the adapter.
      */
-    private class GridSpanSizeLookup extends GridLayoutManager.SpanSizeLookup {
-
-        private int mSpanSize = 1;
-
-        public GridSpanSizeLookup(int spanSize) {
-            mSpanSize = spanSize;
-        }
-
-        @Override
-        public int getSpanSize(int position) {
-            ExCommonRcvAdapter adapter = (ExCommonRcvAdapter) getAdapter();
-            // 如果是头或底的类型，那么就设置横跨所有列
-            if (adapter.getItemViewType(position) == ExCommonRcvAdapter.VIEW_TYPES.HEADER ||
-                    adapter.getItemViewType(position) == ExCommonRcvAdapter.VIEW_TYPES.FOOTER) {
-                return mSpanSize;
-            }
-            return 1;
-        }
+    public void setHeaderView(View headerView) {
+        mHeaderView = headerView;
     }
 
     /**
-     * Set the header view of the adapter.
+     * 设置底部的视图
      */
-    public void addHeaderView(View headerView) {
-        mHeaderView = headerView;
+    public void setFooterView(View footerView) {
+        mFooterView = footerView;
     }
 
     /**
      * @return recycle的头部视图
      */
-    public View getHeaderView() {
+    public View setHeaderView() {
         return mHeaderView;
-    }
-
-
-    /**
-     * 设置底部的视图
-     */
-    public void addFooterView(View footerView) {
-        mFooterView = footerView;
     }
 
     /**
@@ -98,18 +73,21 @@ public class ExRecyclerView extends RecyclerView {
         return mFooterView;
     }
 
-
     /**
-     * 需要在设置头、低、监听器之后再调用setAdapter(Adapter adapter)来设置适配器
+     * 需要在设置头、底、监听器之后再调用setAdapter(Adapter adapter)来设置适配器
      */
     @Override
     public void setAdapter(Adapter adapter) {
         super.setAdapter(adapter);
-        if (adapter instanceof ExCommonRcvAdapter) {
-            ((ExCommonRcvAdapter) adapter).mOnItemClickListener = mOnItemClickListener;
-            ((ExCommonRcvAdapter) adapter).mOnItemLongClickListener = mOnItemLongClickListener;
-            ((ExCommonRcvAdapter) adapter).customHeaderView = mHeaderView;
-            ((ExCommonRcvAdapter) adapter).customFooterView = mFooterView;
+        setHeadOrFooter(adapter);
+    }
+
+    private void setHeadOrFooter(Adapter adapter) {
+        if (adapter != null) {
+            if (adapter instanceof ExRecyclerViewAdapter) {
+                ((ExRecyclerViewAdapter) adapter).setHeaderView(mHeaderView);
+                ((ExRecyclerViewAdapter) adapter).setFooterView(mFooterView);
+            }
         }
     }
 
@@ -126,21 +104,29 @@ public class ExRecyclerView extends RecyclerView {
         smoothScrollToPosition(position);
     }
 
-    /**
-     * 设置item的点击事件
-     */
-    private static AdapterView.OnItemClickListener mOnItemClickListener = null;
-
-    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
-        mOnItemClickListener = listener;
-    }
 
     /**
-     * 设置item的长按事件
+     * 设置Grid/StaggeredGrid LayoutManager的布局样式
      */
-    public static AdapterView.OnItemLongClickListener mOnItemLongClickListener = null;
+    private class GridSpanSizeLookup extends GridLayoutManager.SpanSizeLookup {
 
-    public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener) {
-        mOnItemLongClickListener = listener;
+        private int mSpanSize = 1;
+
+        public GridSpanSizeLookup(int spanSize) {
+            mSpanSize = spanSize;
+        }
+
+        @Override
+        public int getSpanSize(int position) {
+            if (getAdapter() instanceof ExRecyclerViewAdapter) {
+                ExRecyclerViewAdapter adapter = (ExRecyclerViewAdapter) getAdapter();
+                // 如果是头或底的类型，那么就设置横跨所有列
+                if (adapter.getItemViewType(position) == ExRecyclerViewAdapter.VIEW_TYPES.HEADER ||
+                        adapter.getItemViewType(position) == ExRecyclerViewAdapter.VIEW_TYPES.FOOTER) {
+                    return mSpanSize;
+                }
+            }
+            return 1;
+        }
     }
 }

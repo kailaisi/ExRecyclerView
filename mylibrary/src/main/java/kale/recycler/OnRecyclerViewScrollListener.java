@@ -13,8 +13,6 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
  */
 public abstract class OnRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
-    private String TAG = getClass().getSimpleName();
-
     private enum LayoutManagerType {
         LINEAR,
         GRID,
@@ -85,10 +83,10 @@ public abstract class OnRecyclerViewScrollListener extends RecyclerView.OnScroll
      * 判断layoutmanager的类型
      */
     private void judgeLayoutManager(RecyclerView.LayoutManager layoutManager) {
-        if (layoutManager instanceof LinearLayoutManager) {
-            mLayoutManagerType = LayoutManagerType.LINEAR;
-        } else if (layoutManager instanceof GridLayoutManager) {
+        if (layoutManager instanceof GridLayoutManager) {
             mLayoutManagerType = LayoutManagerType.GRID;
+        } else if (layoutManager instanceof LinearLayoutManager) {
+            mLayoutManagerType = LayoutManagerType.LINEAR;
         } else if (layoutManager instanceof StaggeredGridLayoutManager) {
             mLayoutManagerType = LayoutManagerType.STAGGERED_GRID;
         } else {
