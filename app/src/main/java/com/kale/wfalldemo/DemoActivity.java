@@ -47,7 +47,7 @@ public class DemoActivity extends AppCompatActivity {
         mDemoFragment = new DemoFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.waterFall_fl, mDemoFragment).commit();
         floatIV = (ImageView) findViewById(R.id.float_imageButton);
-        
+
         setViews();
         loadData(true);
     }
@@ -168,7 +168,7 @@ public class DemoActivity extends AppCompatActivity {
         Toast.makeText(DemoActivity.this, "bottom", Toast.LENGTH_SHORT).show();
         // 到底部自动加载
         Log.d(TAG, "loading old data");
-        loadData(false);
+        //loadData(false);
     }
 
     float ratio;

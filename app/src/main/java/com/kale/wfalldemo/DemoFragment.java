@@ -1,15 +1,12 @@
 package com.kale.wfalldemo;
 
-import com.kale.wfalldemo.item.OrangeItem;
-import com.kale.wfalldemo.item.WhiteItem;
 import com.kale.wfalldemo.mode.PhotoData;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.util.Log;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +15,10 @@ import android.widget.Button;
 import java.util.ArrayList;
 import java.util.List;
 
-import kale.adapter.AdapterItem;
-import kale.adapter.recycler.CommonRcvAdapter;
 import kale.decoration.DividerGridItemDecoration;
+import kale.recycler.ExRcvAdapterWrapper;
 import kale.recycler.ExRecyclerView;
-import kale.recycler.ExRecyclerViewAdapter;
-import kale.recycler.OnRecyclerViewScrollListener;
+import kale.recycler.OnRcvScrollListener;
 
 /**
  * @author Jack Tony
@@ -34,17 +29,19 @@ public class DemoFragment extends Fragment{
 
     private static final String TAG = "DemoFragment";
 
-    private ExRecyclerView waterFallRcv;
+    private ExRecyclerView mWaterFallRcv;
 
     private View headerView;
 
     private Button footerBtn;
+    
+    private List<PhotoData> mData;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.demo_fragment, null);
-        waterFallRcv = (ExRecyclerView) rootView.findViewById(R.id.waterFall_rcv);
+        mWaterFallRcv = (ExRecyclerView) rootView.findViewById(R.id.waterFall_rcv);
         headerView = LayoutInflater.from(getContext()).inflate(R.layout.demo_header, null);
         getActivity().getWindow().getDecorView().post(new Runnable() {
             @Override
@@ -61,7 +58,7 @@ public class DemoFragment extends Fragment{
         });
         
         footerBtn = new Button(getContext());
-        footerBtn.setText("正在加载...");
+        footerBtn.setText("底部");
         footerBtn.getBackground().setAlpha(80);
         
         setRecyclerView();
@@ -70,25 +67,25 @@ public class DemoFragment extends Fragment{
     
     private void setRecyclerView() {
         // 设置头部或底部的操作应该在setAdapter之前
-/*        waterFallRcv.setHeaderView(headerView);
-        waterFallRcv.setFooterView(footerBtn);*/
+        mWaterFallRcv.setHeaderView(headerView);
+        mWaterFallRcv.setFooterView(footerBtn);
 
         //StaggeredGridLayoutManager layoutManager = new ExStaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         //LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(), LinearLayoutManager.VERTICAL, true);// 可替换
-        waterFallRcv.setLayoutManager(layoutManager);
+        mWaterFallRcv.setLayoutManager(layoutManager);
 
         // 添加分割线
-        waterFallRcv.addItemDecoration(new DividerGridItemDecoration(getContext()));
-        //waterFallRcv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));//可替换
+        mWaterFallRcv.addItemDecoration(new DividerGridItemDecoration(getContext()));
+        //mWaterFallRcv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));//可替换
 
         // 不显示滚动到顶部/底部的阴影（减少绘制）
-        waterFallRcv.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        //waterFallRcv.setClipToPadding(true);
+        mWaterFallRcv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        //mWaterFallRcv.setClipToPadding(true);
         /**
-         * 监听滚动事件
+         * 监听滚动事件，因为这里我确定这个fragment是不会被复用的。所以传入了特定的activity，在实际项目中需要斟酌。推荐在复用的时候传入接口！
          */
-        waterFallRcv.addOnScrollListener(new OnRecyclerViewScrollListener() {
+        mWaterFallRcv.addOnScrollListener(new OnRcvScrollListener() {
             @Override
             public void onScrollUp() {
                 ((DemoActivity) getActivity()).onScrollUp();
@@ -110,39 +107,34 @@ public class DemoFragment extends Fragment{
             }
         });
 
-        // 先放一个空的list
-        waterFallRcv.setAdapter(new ExRecyclerViewAdapter<PhotoData>(new ArrayList<PhotoData>()) {
+        RecyclerView.Adapter adapter;
 
-            @Override
-            public Object getItemViewType(PhotoData data) {
-                return 1 + (int) (Math.random() * 2);
-            }
-
-            @NonNull
-            @Override
-            public AdapterItem<PhotoData> getItemView(Object o) {
-                Log.d(TAG, "getItemView: gogogo");
-                Log.d(TAG, "getItemView: type = " + (int)o);
-                int type = (int) o;
-                if (type == 1) {
-                    return new OrangeItem(((DemoActivity) getActivity()));
-                } else {
-                    return new WhiteItem((DemoActivity) getActivity());
-                }
-            }
-        });
+        mData = new ArrayList<>();
+        adapter = new MyAdapter02(mData, ((DemoActivity) getActivity()));
+        adapter = new MyAdapter01(mData);
+        
+        // 任意替换你的adapter
+        mWaterFallRcv.setAdapter(new ExRcvAdapterWrapper(adapter));
     }
 
     public void scrollToPos(int pos, boolean isSmooth) {
         if (isSmooth) {
-            waterFallRcv.smoothScrollToPosition(pos);
+            mWaterFallRcv.smoothScrollToPosition(pos);
         } else {
-            waterFallRcv.scrollToPosition(pos);
+            mWaterFallRcv.scrollToPosition(pos);
         }
     }
-
+    
+    private int size = 0;
+    
     public void updateData(List<PhotoData> data) {
-        ((CommonRcvAdapter) waterFallRcv.getAdapter()).updateData(data);
+        mData = data;
+        ExRcvAdapterWrapper wrapper = ((ExRcvAdapterWrapper) mWaterFallRcv.getAdapter());
+        //((MyAdapter02) wrapper.getWrappedAdapter()).updateData(data);
+        ((MyAdapter01) wrapper.getWrappedAdapter()).setData(data);
+        //mWaterFallRcv.getAdapter().notifyDataSetChanged();
+        mWaterFallRcv.getAdapter().notifyItemRangeChanged(size, data.size());
+        size = data.size();
     }
     
 }

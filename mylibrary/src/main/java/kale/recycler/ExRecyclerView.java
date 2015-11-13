@@ -84,9 +84,10 @@ public class ExRecyclerView extends RecyclerView {
 
     private void setHeadOrFooter(Adapter adapter) {
         if (adapter != null) {
-            if (adapter instanceof ExRecyclerViewAdapter) {
-                ((ExRecyclerViewAdapter) adapter).setHeaderView(mHeaderView);
-                ((ExRecyclerViewAdapter) adapter).setFooterView(mFooterView);
+            if (adapter instanceof ExRcvAdapterWrapper) {
+                ((ExRcvAdapterWrapper) adapter).setHeaderView(mHeaderView);
+                ((ExRcvAdapterWrapper) adapter).setFooterView(mFooterView);
+                adapter.notifyDataSetChanged();
             }
         }
     }
@@ -118,11 +119,11 @@ public class ExRecyclerView extends RecyclerView {
 
         @Override
         public int getSpanSize(int position) {
-            if (getAdapter() instanceof ExRecyclerViewAdapter) {
-                ExRecyclerViewAdapter adapter = (ExRecyclerViewAdapter) getAdapter();
+            if (getAdapter() instanceof ExRcvAdapterWrapper) {
+                ExRcvAdapterWrapper adapter = (ExRcvAdapterWrapper) getAdapter();
                 // 如果是头或底的类型，那么就设置横跨所有列
-                if (adapter.getItemViewType(position) == ExRecyclerViewAdapter.VIEW_TYPES.HEADER ||
-                        adapter.getItemViewType(position) == ExRecyclerViewAdapter.VIEW_TYPES.FOOTER) {
+                if (adapter.getItemViewType(position) == ExRcvAdapterWrapper.TYPE_HEADER ||
+                        adapter.getItemViewType(position) == ExRcvAdapterWrapper.TYPE_FOOTER) {
                     return mSpanSize;
                 }
             }
