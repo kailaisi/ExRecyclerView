@@ -10,7 +10,7 @@ import android.view.ViewGroup;
  * @author Jack Tony
  * @date 2015/6/2
  */
-public class ExRcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     /**
      * view的基本类型，这里只有头/底部/普通，在子类中可以扩展
@@ -23,9 +23,9 @@ public class ExRcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private View mFooterView = null;
 
-    private RecyclerView.Adapter mWrappedAdapter;
+    private T mWrappedAdapter;
 
-    public ExRcvAdapterWrapper(@NonNull RecyclerView.Adapter adapter) {
+    public ExRcvAdapterWrapper(@NonNull T adapter) {
         mWrappedAdapter = adapter;
         registerAdapterDataObserver(mDataObserver);
     }
@@ -99,7 +99,7 @@ public class ExRcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewH
         mFooterView = footerView;
     }
 
-    public RecyclerView.Adapter getWrappedAdapter() {
+    public T getWrappedAdapter() {
         return mWrappedAdapter;
     }
 
@@ -148,7 +148,8 @@ public class ExRcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewH
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             super.onItemRangeMoved(fromPosition, toPosition, itemCount);
             int headerViewsCountCount = getHeaderViewsCount();
-            mWrappedAdapter.notifyItemRangeChanged(fromPosition + headerViewsCountCount, toPosition + headerViewsCountCount + itemCount);
+            mWrappedAdapter.notifyItemRangeChanged(fromPosition + headerViewsCountCount, 
+                    toPosition + headerViewsCountCount + itemCount);
         }
     };
 

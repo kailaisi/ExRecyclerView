@@ -1,7 +1,5 @@
 package com.kale.wfalldemo;
 
-import com.kale.wfalldemo.extra.net.DataManager;
-import com.kale.wfalldemo.extra.net.ResponseCallback;
 import com.kale.wfalldemo.mode.PhotoData;
 
 import android.os.Bundle;
@@ -16,6 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,34 +26,35 @@ public class DemoActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getSimpleName();
 
-    private float headerHeight;
+    private float mHeaderHeight;
 
     private DemoFragment mDemoFragment;
     
-    private Toolbar toolbar;
+    private Toolbar mToolbar;
 
-    private int num = 0;
+    private int mNum = 0;
 
-    private ImageView floatIV;
+    private ImageView mFloatIV;
+    
+    private List<PhotoData> mDatas;
 
-    private DataManager mDataManager = new DataManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.demo_activity);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        mDatas = new ArrayList<>();
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mDemoFragment = new DemoFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.waterFall_fl, mDemoFragment).commit();
-        floatIV = (ImageView) findViewById(R.id.float_imageButton);
+        mFloatIV = (ImageView) findViewById(R.id.float_imageButton);
 
         setViews();
-        loadData(true);
     }
 
     protected void setViews() {
         setToolbar();
-        floatIV.setOnClickListener(new View.OnClickListener() {
+        mFloatIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mDemoFragment.scrollToPos(0, true);
@@ -66,12 +66,12 @@ public class DemoActivity extends AppCompatActivity {
      * 设置toolbar的背景图和menu点击事件
      */
     private void setToolbar() {
-        //setSupportActionBar(toolbar);
-        toolbar.inflateMenu(R.menu.aaa_menu_main);
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_launcher));//设置导航按钮
-        toolbar.setTitle("Saber");
-        toolbar.setAlpha(0);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        //setSupportActionBar(mToolbar);
+        mToolbar.inflateMenu(R.menu.aaa_menu_main);
+        mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_launcher));//设置导航按钮
+        mToolbar.setTitle("Saber");
+        mToolbar.setAlpha(0);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -79,23 +79,16 @@ public class DemoActivity extends AppCompatActivity {
             }
         });
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 int id = menuItem.getItemId();
                 if (id == R.id.action_add_new_item) {
-                    num++;
+                    mNum++;
                     // 数据全部交给适配器进行管理
-                    PhotoData photo = new PhotoData();
-                    photo.msg = "我是第" + num + "个新来的";
-                    photo.favorite_count = -5;
-                    photo.photo = new PhotoData.Photo();
-                    photo.photo.width = 800;
-                    photo.photo.height = 1000;
-                    photo.photo.path = "http://images.cnitblog.com/blog/651487/201501/292018114419518.png";
-
-                    mDataManager.getData().add(0, photo);
-                    mDemoFragment.updateData(mDataManager.getData());
+                    PhotoData photo = new PhotoData("我是第" + mNum + "个新来的");
+                    mDatas.add(0, photo);
+                    mDemoFragment.updateData(mDatas);
                     return true;
                 } else {
                     return false;
@@ -108,66 +101,54 @@ public class DemoActivity extends AppCompatActivity {
          * 如果你仅仅想要让背景渐变可以用下面的drawable来设置透明度，
          * 它们都是drawable，透明度最大值是255
          *
-         * toolbar.getBackground();
-         * toolbar.getNavigationIcon()
+         * mToolbar.getBackground();
+         * mToolbar.getNavigationIcon()
          */
         /*private Drawable toolbarBgDrawable;
         private Drawable toolbarNavigationIcon;*/
     }
 
-    public void loadData(boolean loadNewData) {
-        //Log.d(TAG, "加载新的数据");
-        ResponseCallback callback = new ResponseCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                mDemoFragment.updateData((List<PhotoData>) object);
-            }
-
-            @Override
-            public void onError(String msg) {
-                Toast.makeText(getBaseContext(), msg, Toast.LENGTH_SHORT).show();
-            }
-        };
-        if (loadNewData) {
-            mDataManager.loadNewData(callback);
-        } else {
-            mDataManager.loadOldData(callback);
-        }
-    }
-    
-    
     /// ------------------ 回调 ------------------------
+
+
+    public void loadData() {
+        String[] array = getResources().getStringArray(R.array.country_names);
+        for (String arr : array) {
+            mDatas.add(new PhotoData(arr));
+        }
+        mDemoFragment.updateData(mDatas);
+    }
     
 
     public void initHeight(int height) {
-        headerHeight = height;
+        mHeaderHeight = height;
     }
 
     public void onItemClick(int position) {
         Toast.makeText(DemoActivity.this, "on click", Toast.LENGTH_SHORT).show();
-        mDataManager.getData().remove(position);
-        mDemoFragment.updateData(mDataManager.getData());
+        mDatas.remove(position);
+        mDemoFragment.updateData(mDatas);
     }
 
     public void onScrollUp() {
         // 滑动时隐藏float button
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) floatIV.getLayoutParams();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mFloatIV.getLayoutParams();
         int fabBottomMargin = lp.bottomMargin;
-        floatIV.animate()
-                .translationY(floatIV.getHeight() + fabBottomMargin)
+        mFloatIV.animate()
+                .translationY(mFloatIV.getHeight() + fabBottomMargin)
                 .setInterpolator(new AccelerateInterpolator(2)).start();
     }
 
     public void onScrollDown() {
         // 滑动时出现float button
-        floatIV.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+        mFloatIV.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
     }
 
     public void onBottom() {
         //Log.d(TAG, "on bottom");
         Toast.makeText(DemoActivity.this, "bottom", Toast.LENGTH_SHORT).show();
         // 到底部自动加载
-        Log.d(TAG, "loading old data");
+        Log.d(TAG, "on bottom");
         //loadData(false);
     }
 
@@ -175,8 +156,8 @@ public class DemoActivity extends AppCompatActivity {
 
     public void onMoved(int distanceX, int distanceY) {
         // Log.d(TAG, "distance X = " + distanceX + "distance Y = " + distanceY);
-        ratio = Math.min(distanceY / headerHeight, 1);
-        toolbar.setAlpha(ratio * 1);
+        ratio = Math.min(distanceY / mHeaderHeight, 1);
+        mToolbar.setAlpha(ratio * 1);
     }
 
 }

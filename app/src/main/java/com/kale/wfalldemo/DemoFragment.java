@@ -37,6 +37,8 @@ public class DemoFragment extends Fragment{
     
     private List<PhotoData> mData;
 
+    private int size = 0;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,7 +74,7 @@ public class DemoFragment extends Fragment{
 
         //StaggeredGridLayoutManager layoutManager = new ExStaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
-        //LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(), LinearLayoutManager.VERTICAL, true);// 可替换
+//        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);// 可替换
         mWaterFallRcv.setLayoutManager(layoutManager);
 
         // 添加分割线
@@ -114,7 +116,8 @@ public class DemoFragment extends Fragment{
         adapter = new MyAdapter01(mData);
         
         // 任意替换你的adapter
-        mWaterFallRcv.setAdapter(new ExRcvAdapterWrapper(adapter));
+        mWaterFallRcv.setAdapter(new ExRcvAdapterWrapper<>(adapter));
+        ((DemoActivity) getActivity()).loadData();
     }
 
     public void scrollToPos(int pos, boolean isSmooth) {
@@ -125,16 +128,14 @@ public class DemoFragment extends Fragment{
         }
     }
     
-    private int size = 0;
-    
     public void updateData(List<PhotoData> data) {
         mData = data;
-        ExRcvAdapterWrapper wrapper = ((ExRcvAdapterWrapper) mWaterFallRcv.getAdapter());
-        //((MyAdapter02) wrapper.getWrappedAdapter()).updateData(data);
-        ((MyAdapter01) wrapper.getWrappedAdapter()).setData(data);
-        //mWaterFallRcv.getAdapter().notifyDataSetChanged();
+        ((ExRcvAdapterWrapper<MyAdapter01>)mWaterFallRcv.getAdapter()).getWrappedAdapter().setData(data);
         mWaterFallRcv.getAdapter().notifyItemRangeChanged(size, data.size());
         size = data.size();
+
+        //((MyAdapter02) wrapper.getWrappedAdapter()).updateData(data);
+        //mWaterFallRcv.getAdapter().notifyDataSetChanged();
     }
     
 }
