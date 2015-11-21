@@ -1,4 +1,4 @@
-package kale.decoration;
+package kale.ui.view.rcv.decoration;
 
 import android.content.Context;
 import android.content.res.TypedArray;

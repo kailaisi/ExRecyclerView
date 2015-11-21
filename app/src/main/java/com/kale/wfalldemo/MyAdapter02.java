@@ -18,7 +18,7 @@ import kale.adapter.recycler.CommonRcvAdapter;
  */
 public class MyAdapter02 extends CommonRcvAdapter<PhotoData>{
 
-    private DemoActivity mActivity;
+    private static DemoActivity mActivity;
     
     public MyAdapter02(List<PhotoData> data, DemoActivity activity) {
         super(data);
@@ -28,58 +28,48 @@ public class MyAdapter02 extends CommonRcvAdapter<PhotoData>{
     @NonNull
     @Override
     public AdapterItem<PhotoData> getItemView(Object o) {
-        return new MyViewHolder(mActivity);
-    }
+        return new AdapterItem<PhotoData>() {
+            
+            private TextView descTv;
 
+            private View mRootView;
 
-    private static class MyViewHolder implements AdapterItem<PhotoData> {
+            private int mPosition;
 
-        private DemoActivity mActivity;
+            @Override
+            public int getLayoutResId() {
+                return R.layout.demo_item;
+            }
 
-        private TextView descTv;
+            @Override
+            public void onBindViews(View view) {
+                mRootView = view;
+                descTv = (TextView) view.findViewById(R.id.desc_tv);
+            }
 
-        private View mRootView;
+            @Override
+            public void onSetViews() {
+                mRootView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mActivity.onItemClick(mPosition);
+                    }
+                });
+                mRootView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        Toast.makeText(mRootView.getContext(), "on long click", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
+            }
 
-        private int mPosition;
-
-        public MyViewHolder(DemoActivity activity) {
-            mActivity = activity;
-        }
-
-        @Override
-        public int getLayoutResId() {
-            return R.layout.demo_item;
-        }
-
-        @Override
-        public void onBindViews(View view) {
-            mRootView = view;
-            descTv = (TextView) view.findViewById(R.id.desc_tv);
-        }
-
-        @Override
-        public void onSetViews() {
-            mRootView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mActivity.onItemClick(mPosition);
-                }
-            });
-            mRootView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Toast.makeText(mRootView.getContext(), "on long click", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            });
-        }
-
-        @Override
-        public void onUpdateViews(PhotoData data, int position) {
-            mPosition = position;
-            descTv.setText("No." + position + " " + data.msg);
-        }
-
+            @Override
+            public void onUpdateViews(PhotoData data, int position) {
+                mPosition = position;
+                descTv.setText("No." + position + " " + data.msg);
+            }
+        };
     }
 
 }

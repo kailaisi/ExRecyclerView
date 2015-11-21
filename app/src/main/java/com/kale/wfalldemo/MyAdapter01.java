@@ -21,8 +21,11 @@ public class MyAdapter01 extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<PhotoData> mData;
     
-    public MyAdapter01(List<PhotoData> data) {
+    private static DemoActivity mActivity;
+    
+    public MyAdapter01(List<PhotoData> data, DemoActivity activity) {
         mData = data;
+        mActivity = activity;
     }
     
     @Override
@@ -43,13 +46,11 @@ public class MyAdapter01 extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public void setData(List<PhotoData> data) {
-        mData = data;
-    }
-
     private static class MyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView descTv;
+        
+        private int mPosition;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -65,7 +66,7 @@ public class MyAdapter01 extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    mActivity.onItemClick(mPosition);
+                    mActivity.onItemClick(mPosition);
                 }
             });
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -78,8 +79,9 @@ public class MyAdapter01 extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void onUpdateViews(PhotoData data, int position) {
+            mPosition = position;
             descTv.setText("No." + position + "     " + data.msg);
         }
     }
-    
+
 }

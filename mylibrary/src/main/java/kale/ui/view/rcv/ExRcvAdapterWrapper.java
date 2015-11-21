@@ -1,4 +1,4 @@
-package kale.recycler;
+package kale.ui.view.rcv;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -27,7 +27,7 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
 
     public ExRcvAdapterWrapper(@NonNull T adapter) {
         mWrappedAdapter = adapter;
-        registerAdapterDataObserver(mDataObserver);
+        //registerAdapterDataObserver(getAdapterDataObserver());
     }
 
     /**
@@ -82,7 +82,7 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
 
         if (isHeader || isFooter) {
             // 如果是header或者是footer则不处理
-            Log.i("ExRcvAdapterWrapper", "onBindViewHolder: Current viewHolder is head or footer");
+            Log.v("ExRcvAdapterWrapper", "onBindViewHolder: Current viewHolder is head or footer");
         } else {
             if (mHeaderView != null) {
                 position--;
@@ -103,10 +103,14 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
         return mWrappedAdapter;
     }
 
-    private int getHeaderViewsCount() {
+    public int getHeaderCount() {
         return mHeaderView != null ? 1 : 0;
     }
 
+    public int getFooterCount() {
+        return mFooterView != null ? 1 : 0;
+    }
+    
     private static class SimpleViewHolder extends RecyclerView.ViewHolder {
 
         public SimpleViewHolder(View itemView) {
@@ -114,44 +118,79 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
         }
 
     }
-    
-    private RecyclerView.AdapterDataObserver mDataObserver = new RecyclerView.AdapterDataObserver() {
 
-        @Override
-        public void onChanged() {
-            super.onChanged();
-            Log.d("dddd", "onChanged");
-            mWrappedAdapter.notifyDataSetChanged();
-        }
+   /* private RecyclerView.AdapterDataObserver getAdapterDataObserver() {
+        return new RecyclerView.AdapterDataObserver() {
 
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            super.onItemRangeChanged(positionStart, itemCount);
-            Log.d("dddd", "onItemRangeChanged: start = " + positionStart);
-            //mWrappedAdapter.notifyItemRangeChanged(positionStart + getHeaderViewsCount(), itemCount);
-        }
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                mWrappedAdapter.notifyDataSetChanged();
+            }
 
-        @Override
-        public void onItemRangeInserted(int positionStart, int itemCount) {
-            super.onItemRangeInserted(positionStart, itemCount);
-            Log.d("dddd", "onItemRangeInserted: start = " + positionStart);
-            mWrappedAdapter.notifyItemRangeInserted(positionStart + getHeaderViewsCount(), itemCount);
-        }
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                super.onItemRangeChanged(positionStart, itemCount);
+                Log.d("ddd", "onItemRangeChanged: ");
+                //mWrappedAdapter.notifyItemRangeChanged(positionStart + getHeaderCount(), itemCount);
+            }
 
-        @Override
-        public void onItemRangeRemoved(int positionStart, int itemCount) {
-            super.onItemRangeRemoved(positionStart, itemCount);
-            mWrappedAdapter.notifyItemRangeRemoved(positionStart + getHeaderViewsCount(), itemCount);
-        }
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                
+                //mWrappedAdapter.notifyItemRangeInserted(positionStart + getHeaderCount(), itemCount);
+            }
 
-        @Override
-        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            super.onItemRangeMoved(fromPosition, toPosition, itemCount);
-            int headerViewsCountCount = getHeaderViewsCount();
-            mWrappedAdapter.notifyItemRangeChanged(fromPosition + headerViewsCountCount, 
-                    toPosition + headerViewsCountCount + itemCount);
-        }
-    };
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                Log.d("ddd", "onItemRangeRemoved: " + positionStart + " head = " + getHeaderCount());
 
+                //mWrappedAdapter.notifyItemRangeRemoved(positionStart + getHeaderCount(), itemCount);
+            }
+
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                super.onItemRangeMoved(fromPosition, toPosition, itemCount);
+                Log.d("ddd", "onItemRangeMoved: ");
+                int headerViewsCountCount = getHeaderCount();
+                //mWrappedAdapter.notifyItemRangeRemoved(fromPosition + headerViewsCountCount, itemCount);
+            }
+        };
+    }
+*/
+
+    /**
+     * 在尾部插入多个数据
+     */
+    public void renderDataAdd(int addCount) {
+        renderDataInsert(getItemCount() - getHeaderCount() - getFooterCount() - 1, addCount);
+    }
+
+    /**
+     * 在中间插入多条数据
+     */
+    public void renderDataInsert(int startPos, int insertCount) {
+        int count = getHeaderCount();
+        notifyItemRangeInserted(startPos + count, insertCount);
+        notifyItemRangeChanged(startPos + count + insertCount - 1, getItemCount() - insertCount - startPos - getFooterCount());
+    }
+
+    /**
+     * 删除一条数据
+     */
+    public void renderDataRemove(int startPos) {
+        int count = getHeaderCount();
+        notifyItemRemoved(count + startPos);
+        notifyItemRangeChanged(count + startPos, getItemCount() - startPos -1 - count);
+    }
+
+    /**
+     * 更新多条数据
+     */
+    public void renderDataUpdate(int startPos, int updateCount) {
+        notifyItemRangeChanged(startPos + getHeaderCount(), updateCount);
+    }
 
 }

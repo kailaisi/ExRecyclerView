@@ -15,14 +15,15 @@
         android:maxLines="6"
         android:textColor="@color/dark"
         android:textSize="20sp"
+        android:layout_margin="20dp"
         tools:text="测试文字"
         />
 
-    <ImageView
+   <!-- <ImageView
         android:id="@+id/content_iv"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:src="@drawable/kale"
-        />
+        />-->
     
 </LinearLayout>

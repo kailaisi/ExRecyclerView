@@ -1,4 +1,4 @@
-package kale.decoration;
+package kale.ui.view.rcv.decoration;
 
 /*
  * Copyright (C) 2014 The Android Open Source Project

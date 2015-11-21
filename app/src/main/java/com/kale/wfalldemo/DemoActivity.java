@@ -14,9 +14,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
  * @author Jack Tony
@@ -35,15 +32,11 @@ public class DemoActivity extends AppCompatActivity {
     private int mNum = 0;
 
     private ImageView mFloatIV;
-    
-    private List<PhotoData> mDatas;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.demo_activity);
-        mDatas = new ArrayList<>();
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mDemoFragment = new DemoFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.waterFall_fl, mDemoFragment).commit();
@@ -87,8 +80,7 @@ public class DemoActivity extends AppCompatActivity {
                     mNum++;
                     // 数据全部交给适配器进行管理
                     PhotoData photo = new PhotoData("我是第" + mNum + "个新来的");
-                    mDatas.add(0, photo);
-                    mDemoFragment.updateData(mDatas);
+                    mDemoFragment.insert2Top(photo);
                     return true;
                 } else {
                     return false;
@@ -107,18 +99,13 @@ public class DemoActivity extends AppCompatActivity {
         /*private Drawable toolbarBgDrawable;
         private Drawable toolbarNavigationIcon;*/
     }
-
-    /// ------------------ 回调 ------------------------
-
-
-    public void loadData() {
-        String[] array = getResources().getStringArray(R.array.country_names);
-        for (String arr : array) {
-            mDatas.add(new PhotoData(arr));
-        }
-        mDemoFragment.updateData(mDatas);
-    }
     
+    //————————————————————————————————————————————————————————————————
+    //                            Jack Tony
+    //
+    //                    callback start 2015/11/21  
+    //                             
+    //————————————————————————————————————————————————————————————————
 
     public void initHeight(int height) {
         mHeaderHeight = height;
@@ -126,8 +113,7 @@ public class DemoActivity extends AppCompatActivity {
 
     public void onItemClick(int position) {
         Toast.makeText(DemoActivity.this, "on click", Toast.LENGTH_SHORT).show();
-        mDatas.remove(position);
-        mDemoFragment.updateData(mDatas);
+        mDemoFragment.remove(position);
     }
 
     public void onScrollUp() {
