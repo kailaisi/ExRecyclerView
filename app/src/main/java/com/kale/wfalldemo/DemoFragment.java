@@ -83,6 +83,7 @@ public class DemoFragment extends Fragment {
         ExRcvAdapterWrapper adapterWrapper = new ExRcvAdapterWrapper<>(mAdapter, layoutManager);
         adapterWrapper.setHeaderView(mHeaderView);
         adapterWrapper.setFooterView(mFooterBtn);
+        
         mWaterFallRcv.setAdapter(adapterWrapper);
 
         /**

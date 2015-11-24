@@ -166,9 +166,7 @@ public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener 
     private int findMax(int[] lastPositions) {
         int max = lastPositions[0];
         for (int value : lastPositions) {
-            if (value > max) {
-                max = value;
-            }
+            max = Math.max(max, value);
         }
         return max;
     }

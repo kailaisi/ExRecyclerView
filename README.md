@@ -1,16 +1,48 @@
 # ExRecyclerView  
-在`ExRecyclerView`中可以设置头、底、item点击监听等操作  
-![image](./demoPic/recyclerView.png)  
+### 在`ExRcvAdapterWrapper`中可以设置头、底操作：   
 
-可利用`OnRecyclerViewScrollListener`监听滑动到顶部、底部的事件，还可以监听滑动的距离    
-![image](./demoPic/scrollListener.png)  
+![](./demoPic/recyclerView.png)   
 
-`ExStaggeredGridLayoutManager`的  
-`setSpanSizeLookup(GridLayoutManager.SpanSizeLookup spanSizeLookup)`可以设置item是否跨列  
+```JAVA
+mAdapter = initAdapter();
+// 支持传入已有的recyclerView的adapter，用它做个包装
+ExRcvAdapterWrapper adapterWrapper = new ExRcvAdapterWrapper<>(mAdapter, layoutManager);
+adapterWrapper.setHeaderView(mHeaderView); // 设置头
+adapterWrapper.setFooterView(mFooterBtn); // 设置底
+        
+mRecyclerView.setAdapter(adapterWrapper);
+```
 
-可利用`DividerGridItemDecoration`或`DividerItemDecoration`来添加分割线  
+----
 
-本项目中demo的adapter用的是通用的adapter（CommonRcvAdapter:[https://github.com/tianzhijiexian/CommonAdapter](https://github.com/tianzhijiexian/CommonAdapter)）来做的。可以方便简单的实现多个item类型的布局。  
+### 可利用`OnRecyclerViewScrollListener`监听滑动到顶部、底部的事件，还可以监听滑动的距离     
+
+![image](./demoPic/scrollListener.png)    
+
+```JAVA 
+        mRecyclerView.addOnScrollListener(new OnRcvScrollListener() {
+            @Override
+            public void onScrollUp() {
+                
+            }
+
+            @Override
+            public void onScrollDown() {
+
+            }
+
+            @Override
+            public void onBottom() {
+
+            }
+
+            @Override
+            public void onScrolled(int distanceX, int distanceY) {
+
+            }
+        });
+```
+ 
 
 ## 使用方式  
   
@@ -25,11 +57,14 @@ repositories {
 ```   
 
 2.添加依赖  
+
 ```  
 dependencies {
-		compile 'com.github.tianzhijiexian:ExRecyclerView:1.1.1'
+	compile 'com.github.tianzhijiexian:ExRecyclerView:1.1.1'
 }    
-```
+```  
+
+如果你想要最轻量的方式，可以直接复制里面的类到你的项目中即可。本项目中的类都是完全独立的，可以组合到不同的场景中。
 
 ## 截图  
 ![image](./demoPic/demo01.png)  
