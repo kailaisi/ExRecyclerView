@@ -1,8 +1,9 @@
 package kale.ui.view.rcv;
 
 import android.support.annotation.NonNull;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -19,15 +20,38 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
 
     public static final int TYPE_FOOTER = 99931;
 
-    private View mHeaderView = null;
+    private static final String TAG = "ddd";
 
-    private View mFooterView = null;
-
+    private final RecyclerView.LayoutManager mLayoutManager;
+    
     private T mWrappedAdapter;
 
-    public ExRcvAdapterWrapper(@NonNull T adapter) {
+    protected View mHeaderView = null;
+
+    protected View mFooterView = null;
+    
+    public ExRcvAdapterWrapper(@NonNull T adapter, RecyclerView.LayoutManager layoutManager) {
         mWrappedAdapter = adapter;
-        //registerAdapterDataObserver(getAdapterDataObserver());
+        mWrappedAdapter.registerAdapterDataObserver(getObserver());
+        
+        mLayoutManager = layoutManager;
+        if (mLayoutManager instanceof GridLayoutManager) {
+            final GridLayoutManager gridLayoutManager = ((GridLayoutManager) mLayoutManager);
+            final GridLayoutManager.SpanSizeLookup lookup = gridLayoutManager.getSpanSizeLookup();
+            final int spanCount = gridLayoutManager.getSpanCount();
+
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    final int type = getItemViewType(position);
+                    if (type == TYPE_HEADER || type == TYPE_FOOTER) {
+                        return spanCount;
+                    } else {
+                        return lookup.getSpanSize(position - getHeaderCount());
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -54,10 +78,7 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
         } else if (mFooterView != null && position == getItemCount() - 1) {
             return TYPE_FOOTER;
         } else {
-            if (mHeaderView != null) {
-                position--;
-            }
-            return mWrappedAdapter.getItemViewType(position);
+            return mWrappedAdapter.getItemViewType(position - getHeaderCount());
         }
     }
 
@@ -76,27 +97,59 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
      * 载入ViewHolder，这里仅仅处理header和footer视图的逻辑
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int position) {
-        boolean isHeader = mHeaderView != null && position == 0;
-        boolean isFooter = mFooterView != null && position == getItemCount() - 1;
-
-        if (isHeader || isFooter) {
-            // 如果是header或者是footer则不处理
-            Log.v("ExRcvAdapterWrapper", "onBindViewHolder: Current viewHolder is head or footer");
-        } else {
-            if (mHeaderView != null) {
-                position--;
-            }
-            mWrappedAdapter.onBindViewHolder(viewHolder, position);
+        final int type = getItemViewType(position);
+        if (type != TYPE_HEADER && type != TYPE_FOOTER) {
+            mWrappedAdapter.onBindViewHolder(viewHolder, position - getHeaderCount());
         }
     }
 
-    public void setHeaderView(View headerView) {
+    public void setHeaderView(@NonNull View headerView) {
         mHeaderView = headerView;
+        setFulSpan(mHeaderView);
     }
 
-    public void setFooterView(View footerView) {
+    public void setFooterView(@NonNull View footerView) {
         mFooterView = footerView;
+        setFulSpan(mFooterView);
+    }
+
+    private void setFulSpan(View view) {
+        if (mLayoutManager instanceof StaggeredGridLayoutManager) {
+            StaggeredGridLayoutManager.LayoutParams layoutParams = new StaggeredGridLayoutManager.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.setFullSpan(true);
+            view.setLayoutParams(layoutParams);
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * @return recycle的头部视图
+     */
+    public View getHeaderView() {
+        return mHeaderView;
+    }
+
+    /**
+     * 得到底部的视图
+     */
+    public View getFooterView() {
+        return mFooterView;
+    }
+
+    public void removeHeaderView() {
+        mHeaderView = null;
+        // notifyItemRemoved(0);如果这里需要做头部的删除动画，
+        // 可以复写这个方法，然后进行改写
+        notifyDataSetChanged();
+    }
+
+    public void removeFooterView() {
+        mFooterView = null;
+        notifyItemRemoved(getItemCount());
+        // 这里因为删除尾部不会影响到前面的pos的改变，所以不用刷新了。
     }
 
     public T getWrappedAdapter() {
@@ -110,87 +163,56 @@ public class ExRcvAdapterWrapper<T extends RecyclerView.Adapter> extends Recycle
     public int getFooterCount() {
         return mFooterView != null ? 1 : 0;
     }
-    
+
+    public RecyclerView.LayoutManager getLayoutManager() {
+        return mLayoutManager;
+    }
+
+    @NonNull
+    private RecyclerView.AdapterDataObserver getObserver() {
+        return new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                super.onItemRangeChanged(positionStart, itemCount);
+                notifyItemRangeChanged(positionStart + getHeaderCount(), itemCount);
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                int count = getHeaderCount();
+                notifyItemRangeInserted(positionStart + count, itemCount);
+                notifyItemRangeChanged(positionStart + count + itemCount - 1, getItemCount() - itemCount - positionStart - getFooterCount());
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                int count = getHeaderCount();
+                notifyItemRangeRemoved(count + positionStart, itemCount);
+                notifyItemRangeChanged(count + positionStart, getItemCount() - count - positionStart - getFooterCount());
+            }
+
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                super.onItemRangeMoved(fromPosition, toPosition, itemCount);
+                // TODO: 2015/11/23 还没支持转移的操作 
+            }
+        };
+    }
+
     private static class SimpleViewHolder extends RecyclerView.ViewHolder {
 
         public SimpleViewHolder(View itemView) {
             super(itemView);
         }
 
-    }
-
-   /* private RecyclerView.AdapterDataObserver getAdapterDataObserver() {
-        return new RecyclerView.AdapterDataObserver() {
-
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                mWrappedAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                super.onItemRangeChanged(positionStart, itemCount);
-                Log.d("ddd", "onItemRangeChanged: ");
-                //mWrappedAdapter.notifyItemRangeChanged(positionStart + getHeaderCount(), itemCount);
-            }
-
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                
-                //mWrappedAdapter.notifyItemRangeInserted(positionStart + getHeaderCount(), itemCount);
-            }
-
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                super.onItemRangeRemoved(positionStart, itemCount);
-                Log.d("ddd", "onItemRangeRemoved: " + positionStart + " head = " + getHeaderCount());
-
-                //mWrappedAdapter.notifyItemRangeRemoved(positionStart + getHeaderCount(), itemCount);
-            }
-
-            @Override
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                super.onItemRangeMoved(fromPosition, toPosition, itemCount);
-                Log.d("ddd", "onItemRangeMoved: ");
-                int headerViewsCountCount = getHeaderCount();
-                //mWrappedAdapter.notifyItemRangeRemoved(fromPosition + headerViewsCountCount, itemCount);
-            }
-        };
-    }
-*/
-
-    /**
-     * 在尾部插入多个数据
-     */
-    public void renderDataAdd(int addCount) {
-        renderDataInsert(getItemCount() - getHeaderCount() - getFooterCount() - 1, addCount);
-    }
-
-    /**
-     * 在中间插入多条数据
-     */
-    public void renderDataInsert(int startPos, int insertCount) {
-        int count = getHeaderCount();
-        notifyItemRangeInserted(startPos + count, insertCount);
-        notifyItemRangeChanged(startPos + count + insertCount - 1, getItemCount() - insertCount - startPos - getFooterCount());
-    }
-
-    /**
-     * 删除一条数据
-     */
-    public void renderDataRemove(int startPos) {
-        int count = getHeaderCount();
-        notifyItemRemoved(count + startPos);
-        notifyItemRangeChanged(count + startPos, getItemCount() - startPos -1 - count);
-    }
-
-    /**
-     * 更新多条数据
-     */
-    public void renderDataUpdate(int startPos, int updateCount) {
-        notifyItemRangeChanged(startPos + getHeaderCount(), updateCount);
     }
 
 }

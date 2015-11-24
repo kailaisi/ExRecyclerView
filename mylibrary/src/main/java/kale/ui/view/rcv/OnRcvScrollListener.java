@@ -53,7 +53,7 @@ public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener 
      * X轴移动的实际距离（最左侧为0）
      */
     private int mScrolledXDistance = 0;
-
+    
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
@@ -70,7 +70,7 @@ public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener 
         mScrolledYDistance += dy;
         mScrolledXDistance = (mScrolledXDistance < 0) ? 0 : mScrolledXDistance;
         mScrolledYDistance = (mScrolledYDistance < 0) ? 0 : mScrolledYDistance;
-        onMoved(mScrolledXDistance, mScrolledYDistance);
+        onScrolled(mScrolledXDistance, mScrolledYDistance);
     }
 
 
@@ -152,7 +152,7 @@ public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener 
                 && mLastVisibleItemPosition >= totalItemCount - 1) {
             //Log.d(TAG, "is loading more");
             onBottom();
-        }
+        } 
     }
 
     public abstract void onScrollUp();
@@ -161,7 +161,7 @@ public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener 
 
     public abstract void onBottom();
 
-    public abstract void onMoved(int distanceX ,int distanceY);
+    public abstract void onScrolled(int distanceX, int distanceY);
 
     private int findMax(int[] lastPositions) {
         int max = lastPositions[0];

@@ -11,11 +11,11 @@
         android:id="@+id/desc_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
         android:ellipsize="end"
         android:maxLines="6"
         android:textColor="@color/dark"
         android:textSize="20sp"
-        android:layout_margin="20dp"
         tools:text="测试文字"
         />
 
